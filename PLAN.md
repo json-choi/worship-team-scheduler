@@ -178,102 +178,147 @@ Notification
 
 ## 5. 기술 스택
 
-| 레이어 | 기술 | 이유 |
-|--------|------|------|
-| **Framework** | Next.js 15 (App Router) | SSR + API Routes + Server Actions, 풀스택 |
-| **UI** | React 19 + TailwindCSS + shadcn/ui | 빠른 개발, 모바일 반응형 |
-| **Database** | Supabase (PostgreSQL) | 호스팅된 DB + Auth + Realtime + Storage |
-| **Auth** | Supabase Auth (Google OAuth) | Google 로그인 + Calendar 권한 동시 처리 |
-| **Calendar** | Google Calendar API v3 | 읽기/쓰기 양방향 연동 |
-| **Push** | Web Push API + Supabase Edge Functions | 브라우저 푸시 알림 |
-| **File Storage** | Supabase Storage | 악보/첨부파일 업로드 |
-| **Realtime** | Supabase Realtime | 투표 현황 실시간 업데이트 |
-| **Deploy** | Vercel | Next.js 최적화, 자동 배포 |
-| **Mobile** | PWA (Progressive Web App) | 앱 설치 없이 홈 화면 추가 |
+| 레이어 | 기술 | 버전 | 이유 |
+|--------|------|------|------|
+| **Mobile App** | Expo (React Native) | 54.x | iOS/Android 네이티브 앱 출시, EAS Build |
+| **Navigation** | Expo Router | 6.x | 파일 기반 라우팅, 딥링크 지원 |
+| **UI** | React Native + NativeWind + gluestack-ui | latest | Tailwind 스타일 + 네이티브 컴포넌트 |
+| **Backend API** | Hono | 4.x | 경량 + Vercel 배포 최적화, RPC 타입 안전 |
+| **Deploy (API)** | Vercel (Serverless Functions) | - | Hono 네이티브 지원, 무료 티어 |
+| **Database** | Supabase (PostgreSQL) | - | 호스팅 DB + Auth + Realtime + Storage |
+| **Auth** | Supabase Auth (Google OAuth) | - | Google 로그인 + Calendar 권한 동시 처리 |
+| **Calendar** | Google Calendar API v3 | - | 읽기/쓰기 양방향 연동 |
+| **Push** | Expo Notifications + FCM/APNs | - | 네이티브 푸시 알림 |
+| **File Storage** | Supabase Storage | - | 악보/첨부파일 업로드 |
+| **Realtime** | Supabase Realtime | - | 투표 현황 실시간 업데이트 |
+| **Validation** | Zod | latest | API + 클라이언트 공유 스키마 |
+| **State** | TanStack Query (React Query) | latest | 서버 상태 관리, 캐싱, 오프라인 지원 |
+
+### 모노레포 구조
+```
+worship-team-scheduler/
+├── apps/
+│   └── mobile/          — Expo 앱 (React Native)
+├── packages/
+│   ├── api/             — Hono API 서버 (Vercel 배포)
+│   ├── db/              — Supabase 스키마 + Drizzle ORM
+│   └── shared/          — 공유 타입, Zod 스키마, 유틸
+├── package.json         — Bun workspace root
+└── turbo.json           — Turborepo 빌드 설정
+```
 
 ---
 
-## 6. 페이지 구조
+## 6. 화면 구조 (Expo Router)
 
 ```
-/ (랜딩)
-├── /login — Google 로그인
-├── /onboarding — 프로필 입력 + 팀 참가
+apps/mobile/app/
+├── (auth)/              — 인증 전 화면
+│   ├── login.tsx        — Google 로그인
+│   └── onboarding.tsx   — 프로필 입력 + 팀 참가
 │
-├── /dashboard — 메인 대시보드
-│   ├── 다가오는 내 일정 카드
-│   ├── 미투표 스케줄 알림
-│   └── 최근 콘티 알림
+├── (tabs)/              — 메인 탭 네비게이션
+│   ├── _layout.tsx      — 하단 탭 바 (홈/스케줄/캘린더/알림/설정)
+│   ├── index.tsx        — 홈 (다가오는 일정, 미투표 알림, 최근 콘티)
+│   ├── schedule/
+│   │   ├── index.tsx    — 월별 스케줄 리스트
+│   │   ├── [id].tsx     — 일정 상세 (투표 + 배정 결과 + 콘티)
+│   │   └── [id]/vote.tsx — 투표 화면
+│   ├── calendar.tsx     — 캘린더 뷰 (Google Calendar 통합)
+│   ├── notifications.tsx — 알림 목록
+│   └── settings.tsx     — 개인 설정
 │
-├── /schedule — 스케줄
-│   ├── /schedule/[month] — 월별 스케줄 뷰
-│   ├── /schedule/[id] — 일정 상세 (투표 + 콘티)
-│   └── /schedule/[id]/vote — 투표 화면
+├── team/                — 팀 관리 (스택 네비게이션)
+│   ├── members.tsx      — 멤버 목록
+│   ├── positions.tsx    — 포지션 관리
+│   └── settings.tsx     — 팀 설정
 │
-├── /team — 팀 관리
-│   ├── /team/members — 멤버 목록
-│   ├── /team/positions — 포지션 관리
-│   └── /team/settings — 팀 설정
+├── admin/               — 관리자 전용
+│   ├── schedule/
+│   │   ├── new.tsx      — 스케줄 생성
+│   │   └── [id]/assign.tsx — 분배 확인/수동 조정/승인
+│   └── members.tsx      — 가입 승인
 │
-├── /admin — 관리자
-│   ├── /admin/schedule/new — 스케줄 생성
-│   ├── /admin/schedule/[id]/assign — 분배 확인/승인
-│   └── /admin/members — 가입 승인
+├── setlist/             — 콘티
+│   ├── [scheduleId].tsx — 콘티 보기
+│   └── [scheduleId]/edit.tsx — 콘티 작성/수정
 │
-├── /setlist — 콘티
-│   ├── /setlist/[schedule_id] — 콘티 보기
-│   └── /setlist/[schedule_id]/edit — 콘티 작성/수정
-│
-├── /calendar — 캘린더 뷰 (Google Calendar 통합)
-├── /notifications — 알림 목록
-└── /settings — 개인 설정 (알림, 캘린더 연동)
+└── _layout.tsx          — 루트 레이아웃 (auth 체크)
+```
+
+### Hono API 라우트 (packages/api/)
+```
+src/
+├── index.ts             — Hono app 엔트리
+├── routes/
+│   ├── auth.ts          — 인증 (Google OAuth callback)
+│   ├── teams.ts         — 팀 CRUD, 가입 신청/승인
+│   ├── positions.ts     — 포지션 CRUD
+│   ├── schedules.ts     — 스케줄 생성/조회
+│   ├── votes.ts         — 투표 CRUD
+│   ├── assignments.ts   — 자동 분배, 수동 조정, 승인
+│   ├── setlists.ts      — 콘티 CRUD
+│   ├── notifications.ts — 알림 조회/읽음 처리
+│   └── calendar.ts      — Google Calendar 연동
+├── middleware/
+│   ├── auth.ts          — JWT 검증 미들웨어
+│   └── validate.ts      — Zod 검증 미들웨어
+├── lib/
+│   ├── supabase.ts      — Supabase 클라이언트
+│   ├── assignment.ts    — 자동 분배 알고리즘
+│   └── calendar.ts      — Google Calendar 헬퍼
+└── types.ts             — Hono RPC 타입 export
 ```
 
 ---
 
 ## 7. 개발 Phase
 
-### Phase 1 — 기반 (MVP Core)
-- [ ] P1-1: Next.js 프로젝트 셋업 (Bun + TailwindCSS + shadcn/ui)
-- [ ] P1-2: Supabase 설정 (DB 스키마, Auth, Storage)
-- [ ] P1-3: Google OAuth 로그인
-- [ ] P1-4: 온보딩 플로우 (프로필 입력 + 팀 참가 신청)
-- [ ] P1-5: 팀 생성 + 관리자 대시보드
-- [ ] P1-6: 포지션 관리 CRUD
+### Phase 1 — 기반
+- [ ] P1-1: 모노레포 셋업 (Bun workspace + Turborepo)
+- [ ] P1-2: Expo 앱 초기화 (Expo 54 + Expo Router 6 + NativeWind)
+- [ ] P1-3: Hono API 서버 초기화 (Vercel 배포 설정)
+- [ ] P1-4: Supabase 설정 (DB 스키마 + Drizzle ORM + Auth)
+- [ ] P1-5: 공유 패키지 (Zod 스키마, 타입, 유틸)
+- [ ] P1-6: Google OAuth 로그인 (Expo AuthSession + Supabase Auth)
+- [ ] P1-7: 온보딩 플로우 (프로필 입력 + 팀 참가 신청)
+- [ ] P1-8: 팀 생성 + 관리자 대시보드
+- [ ] P1-9: 포지션 관리 CRUD
 
 ### Phase 2 — 스케줄링 핵심
-- [ ] P2-1: 스케줄 생성 (관리자, 반복 패턴)
+- [ ] P2-1: 스케줄 생성 API + UI (관리자, 반복 패턴)
 - [ ] P2-2: 투표 UI (캘린더 뷰 + 가능/불가/미정)
 - [ ] P2-3: 투표 현황 매트릭스 뷰
-- [ ] P2-4: 자동 분배 알고리즘 구현
+- [ ] P2-4: 자동 분배 알고리즘 구현 (packages/api/src/lib/assignment.ts)
 - [ ] P2-5: 분배 결과 확인 + 수동 조정 UI
 - [ ] P2-6: 관리자 최종 승인 플로우
 
 ### Phase 3 — 캘린더 연동
 - [ ] P3-1: Google Calendar OAuth 스코프 추가
-- [ ] P3-2: 내 캘린더 읽기 (투표 화면에 표시)
+- [ ] P3-2: 내 캘린더 읽기 (투표 화면에 기존 일정 표시)
 - [ ] P3-3: 확정 일정 → Google Calendar에 이벤트 추가
 - [ ] P3-4: 이벤트 상세 (포지션, 콘티 링크 포함)
 
 ### Phase 4 — 콘티 & 소통
-- [ ] P4-1: 콘티 작성 UI (Rich Text + 곡 목록)
-- [ ] P4-2: 유튜브 링크 임베드
-- [ ] P4-3: 파일 첨부 (Supabase Storage)
-- [ ] P4-4: 코멘트 시스템
+- [ ] P4-1: 콘티 작성 UI (곡 목록 + 키 + BPM)
+- [ ] P4-2: 유튜브 링크 임베드 (react-native-youtube-iframe)
+- [ ] P4-3: 파일 첨부 (Supabase Storage + expo-document-picker)
+- [ ] P4-4: 코멘트 시스템 (Supabase Realtime)
 
-### Phase 5 — 알림 & PWA
-- [ ] P5-1: Web Push 알림 설정
-- [ ] P5-2: 알림 트리거 구현 (투표 마감, 일정 확정, 콘티 등록)
+### Phase 5 — 알림 & 앱 출시
+- [ ] P5-1: Expo Notifications 설정 (FCM + APNs)
+- [ ] P5-2: 알림 트리거 구현 (Supabase Edge Functions 또는 Hono cron)
 - [ ] P5-3: 인앱 알림 센터
-- [ ] P5-4: PWA 매니페스트 + 오프라인 지원
-- [ ] P5-5: 모바일 최적화
+- [ ] P5-4: EAS Build + EAS Submit (App Store + Play Store)
+- [ ] P5-5: 앱 아이콘, 스플래시, 스토어 에셋
 
 ### Phase 6 — 폴리시
 - [ ] P6-1: 대시보드 위젯 (다가오는 일정, 미투표)
-- [ ] P6-2: 통계 (참여율, 포지션별 분포)
-- [ ] P6-3: 다크모드
+- [ ] P6-2: 통계 (참여율, 포지션별 분포 차트)
+- [ ] P6-3: 다크모드 (NativeWind dark scheme)
 - [ ] P6-4: 멀티 팀 지원 (한 사람이 여러 팀)
-- [ ] P6-5: 카카오톡 알림 연동 (선택)
+- [ ] P6-5: 카카오톡/문자 알림 연동 (선택)
+- [ ] P6-6: 오프라인 지원 (TanStack Query persistence)
 
 ---
 
@@ -318,22 +363,24 @@ def auto_assign(schedule, votes, history):
 - **라이브러리 최신 유지**: 항상 latest stable 사용, 에러 시 버전 먼저 확인
 - **공식 문서 우선**: Next.js 15 App Router 패턴, Supabase v2 클라이언트
 - **TypeScript strict mode**: `any` 최소화
-- **Server Components 우선**: 가능하면 서버 컴포넌트, 클라이언트 최소화
+- **Expo 최신**: Expo SDK 54, Expo Router 6, React Native 최신 안정 버전
+- **Hono RPC**: 클라이언트에서 타입 안전한 API 호출 (`hc<AppType>`)
 - **테스트**: 핵심 로직 (분배 알고리즘, 투표 집계) 유닛 테스트 필수
 
 ---
 
 ## 10. MVP 범위 (Phase 1-2)
 
-**포함**:
-- Google 로그인
+**포함 (Phase 1-2)**:
+- Expo 앱 + Hono API 모노레포 셋업
+- Google 로그인 (Supabase Auth)
 - 팀 생성/참가
 - 포지션 관리
 - 스케줄 생성 + 투표
 - 자동 분배 + 관리자 승인
 
-**제외 (나중에)**:
+**제외 (Phase 3+)**:
 - Google Calendar 연동
 - 콘티 시스템
 - 푸시 알림
-- PWA
+- 앱 스토어 출시

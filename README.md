@@ -13,16 +13,28 @@
 
 ## Tech Stack
 
-- **Frontend**: Next.js 15 (App Router) + React 19 + TailwindCSS + shadcn/ui
-- **Backend**: Next.js API Routes + Server Actions
-- **Database**: Supabase (PostgreSQL + Auth + Realtime)
-- **Calendar**: Google Calendar API
-- **Push**: Web Push API + FCM
-- **Deploy**: Vercel
+- **Mobile**: Expo 54 (React Native) + Expo Router 6
+- **UI**: NativeWind (TailwindCSS) + gluestack-ui
+- **Backend**: Hono 4.x on Vercel (Serverless)
+- **Database**: Supabase (PostgreSQL + Auth + Realtime + Storage)
+- **Calendar**: Google Calendar API v3
+- **Push**: Expo Notifications (FCM + APNs)
+- **Monorepo**: Bun Workspaces + Turborepo
+
+## Project Structure
+
+```
+apps/mobile/       — Expo 앱 (iOS/Android)
+packages/api/      — Hono API 서버 (Vercel)
+packages/db/       — Supabase 스키마 + Drizzle
+packages/shared/   — 공유 타입, Zod 스키마
+```
 
 ## Getting Started
 
 ```bash
 bun install
-bun dev
+bun dev          # 전체 (Expo + API)
+bun dev:mobile   # Expo만
+bun dev:api      # API만
 ```
