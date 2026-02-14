@@ -1,0 +1,24 @@
+{
+  "name": "@wts/api",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev src/index.ts --port 3000",
+    "build": "tsc",
+    "lint": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@hono/zod-validator": "^0.4.0",
+    "hono": "^4.7.0",
+    "@wts/db": "workspace:*",
+    "@wts/shared": "workspace:*",
+    "drizzle-orm": "^0.39.0",
+    "postgres": "^3.4.0",
+    "zod": "^3.24.0"
+  },
+  "devDependencies": {
+    "@types/node": "^25.2.3",
+    "typescript": "^5.7.0"
+  }
+}
