@@ -6,6 +6,9 @@ import auth from "./routes/auth";
 import teams from "./routes/teams";
 import positions from "./routes/positions";
 import members from "./routes/members";
+import schedulesRoute from "./routes/schedules";
+import votesRoute from "./routes/votes";
+import assignmentsRoute from "./routes/assignments";
 
 const app = new Hono().basePath("/api");
 
@@ -23,6 +26,9 @@ app.route("/auth", auth);
 app.route("/teams", teams);
 app.route("/positions", positions);
 app.route("/members", members);
+app.route("/schedules", schedulesRoute);
+app.route("/votes", votesRoute);
+app.route("/assignments", assignmentsRoute);
 
 app.get("/health", (c) => c.json({ status: "ok" }));
 

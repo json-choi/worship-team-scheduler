@@ -3,6 +3,7 @@ export * from "./schemas/position";
 export * from "./schemas/member";
 export * from "./schemas/schedule";
 export * from "./schemas/vote";
+export * from "./schemas/assignment";
 export * from "./schemas/user";
 export * from "./types";
 export * from "./constants";
