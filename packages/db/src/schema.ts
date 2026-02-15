@@ -7,6 +7,7 @@ import {
   jsonb,
   pgEnum,
   uniqueIndex,
+  boolean,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 
@@ -83,15 +84,20 @@ export const teamPositionsRelations = relations(
   }),
 );
 
+// Better Auth core table: user (mapped to "users")
 export const users = pgTable("users", {
-  id: uuid("id").primaryKey(),
+  id: text("id").primaryKey(),
   email: text("email").notNull().unique(),
+  emailVerified: boolean("email_verified").notNull().default(false),
   name: text("name"),
+  image: text("avatar_url"),
   phone: text("phone"),
-  avatarUrl: text("avatar_url"),
   googleCalendarToken: text("google_calendar_token"),
   pushToken: text("push_token"),
   createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
     .defaultNow()
     .notNull(),
 });
@@ -101,7 +107,76 @@ export const usersRelations = relations(users, ({ many }) => ({
   votes: many(scheduleVotes),
   assignments: many(scheduleAssignments),
   notifications: many(notifications),
+  sessions: many(sessions),
+  accounts: many(accounts),
 }));
+
+// Better Auth core table: session
+export const sessions = pgTable("session", {
+  id: text("id").primaryKey(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  token: text("token").notNull().unique(),
+  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+  ipAddress: text("ip_address"),
+  userAgent: text("user_agent"),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+});
+
+export const sessionsRelations = relations(sessions, ({ one }) => ({
+  user: one(users, { fields: [sessions.userId], references: [users.id] }),
+}));
+
+// Better Auth core table: account
+export const accounts = pgTable("account", {
+  id: text("id").primaryKey(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  accountId: text("account_id").notNull(),
+  providerId: text("provider_id").notNull(),
+  accessToken: text("access_token"),
+  refreshToken: text("refresh_token"),
+  accessTokenExpiresAt: timestamp("access_token_expires_at", {
+    withTimezone: true,
+  }),
+  refreshTokenExpiresAt: timestamp("refresh_token_expires_at", {
+    withTimezone: true,
+  }),
+  scope: text("scope"),
+  idToken: text("id_token"),
+  password: text("password"),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+});
+
+export const accountsRelations = relations(accounts, ({ one }) => ({
+  user: one(users, { fields: [accounts.userId], references: [users.id] }),
+}));
+
+// Better Auth core table: verification
+export const verifications = pgTable("verification", {
+  id: text("id").primaryKey(),
+  identifier: text("identifier").notNull(),
+  value: text("value").notNull(),
+  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+});
 
 export const teamMembers = pgTable(
   "team_members",
@@ -110,7 +185,7 @@ export const teamMembers = pgTable(
     teamId: uuid("team_id")
       .notNull()
       .references(() => teams.id, { onDelete: "cascade" }),
-    userId: uuid("user_id")
+    userId: text("user_id")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
     role: memberRoleEnum("role").notNull().default("member"),
@@ -142,7 +217,7 @@ export const schedules = pgTable("schedules", {
   description: text("description"),
   status: scheduleStatusEnum("status").notNull().default("draft"),
   votingDeadline: timestamp("voting_deadline", { withTimezone: true }),
-  createdBy: uuid("created_by")
+  createdBy: text("created_by")
     .notNull()
     .references(() => users.id),
   createdAt: timestamp("created_at", { withTimezone: true })
@@ -165,7 +240,7 @@ export const scheduleVotes = pgTable(
     scheduleId: uuid("schedule_id")
       .notNull()
       .references(() => schedules.id, { onDelete: "cascade" }),
-    userId: uuid("user_id")
+    userId: text("user_id")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
     availability: availabilityEnum("availability").notNull(),
@@ -196,7 +271,7 @@ export const scheduleAssignments = pgTable(
     scheduleId: uuid("schedule_id")
       .notNull()
       .references(() => schedules.id, { onDelete: "cascade" }),
-    userId: uuid("user_id")
+    userId: text("user_id")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
     positionId: uuid("position_id")
@@ -238,7 +313,7 @@ export const setlists = pgTable("setlists", {
   scheduleId: uuid("schedule_id")
     .notNull()
     .references(() => schedules.id, { onDelete: "cascade" }),
-  createdBy: uuid("created_by")
+  createdBy: text("created_by")
     .notNull()
     .references(() => users.id),
   content: text("content"),
@@ -266,7 +341,7 @@ export const setlistComments = pgTable("setlist_comments", {
   setlistId: uuid("setlist_id")
     .notNull()
     .references(() => setlists.id, { onDelete: "cascade" }),
-  userId: uuid("user_id")
+  userId: text("user_id")
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
   content: text("content").notNull(),
@@ -291,7 +366,7 @@ export const setlistCommentsRelations = relations(
 
 export const notifications = pgTable("notifications", {
   id: uuid("id").defaultRandom().primaryKey(),
-  userId: uuid("user_id")
+  userId: text("user_id")
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
   type: notificationTypeEnum("type").notNull(),

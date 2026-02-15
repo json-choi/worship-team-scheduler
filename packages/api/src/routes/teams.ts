@@ -4,7 +4,7 @@ import { eq, and } from "drizzle-orm";
 import { teams, teamMembers, teamPositions, users } from "@wts/db";
 import { createTeamSchema, updateTeamSchema, joinTeamSchema } from "@wts/shared";
 import { DEFAULT_POSITIONS, INVITE_CODE_LENGTH } from "@wts/shared";
-import { getDb } from "../lib/supabase";
+import { getDb } from "../lib/db";
 import { authMiddleware, type AuthEnv } from "../middleware/auth";
 import { jsonValidator, paramValidator } from "../middleware/validate";
 

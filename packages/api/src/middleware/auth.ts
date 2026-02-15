@@ -1,4 +1,5 @@
 import { createMiddleware } from "hono/factory";
+import { auth } from "../lib/auth";
 
 export type AuthEnv = {
   Variables: {
@@ -8,26 +9,15 @@ export type AuthEnv = {
 };
 
 export const authMiddleware = createMiddleware<AuthEnv>(async (c, next) => {
-  const authHeader = c.req.header("Authorization");
-  if (!authHeader?.startsWith("Bearer ")) {
-    return c.json({ data: null, error: { message: "Missing authorization header" } }, 401);
-  }
-
-  const token = authHeader.slice(7);
-
   try {
-    const supabaseUrl = process.env.SUPABASE_URL;
-    const response = await fetch(`${supabaseUrl}/auth/v1/user`, {
-      headers: { Authorization: `Bearer ${token}`, apikey: process.env.SUPABASE_ANON_KEY! },
-    });
+    const session = await auth.api.getSession({ headers: c.req.raw.headers });
 
-    if (!response.ok) {
-      return c.json({ data: null, error: { message: "Invalid token" } }, 401);
+    if (!session) {
+      return c.json({ data: null, error: { message: "Not authenticated" } }, 401);
     }
 
-    const user = (await response.json()) as { id: string; email: string };
-    c.set("userId", user.id);
-    c.set("userEmail", user.email);
+    c.set("userId", session.user.id);
+    c.set("userEmail", session.user.email);
     await next();
   } catch {
     return c.json({ data: null, error: { message: "Authentication failed" } }, 401);

@@ -1,13 +1,11 @@
-import { supabase } from "./supabase";
+import { authClient } from "./auth";
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL ?? "http://localhost:3000";
 
-async function getAuthHeaders(): Promise<Record<string, string>> {
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
-  if (!session?.access_token) return {};
-  return { Authorization: `Bearer ${session.access_token}` };
+function getAuthHeaders(): Record<string, string> {
+  const cookies = authClient.getCookie();
+  if (!cookies) return {};
+  return { Cookie: cookies };
 }
 
 interface RequestOptions {
@@ -30,13 +28,14 @@ export async function api<T>(
 
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
-    ...(await getAuthHeaders()),
+    ...getAuthHeaders(),
   };
 
   const response = await fetch(url, {
     method,
     headers,
     body: body ? JSON.stringify(body) : undefined,
+    credentials: "omit",
   });
 
   const json = await response.json();

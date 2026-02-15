@@ -8,7 +8,7 @@ import {
   batchCreateSchedulesSchema,
   scheduleQuerySchema,
 } from "@wts/shared";
-import { getDb } from "../lib/supabase";
+import { getDb } from "../lib/db";
 import { authMiddleware, type AuthEnv } from "../middleware/auth";
 import {
   jsonValidator,

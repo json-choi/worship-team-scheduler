@@ -16,7 +16,7 @@ import {
   confirmAssignmentsSchema,
   assignmentQuerySchema,
 } from "@wts/shared";
-import { getDb } from "../lib/supabase";
+import { getDb } from "../lib/db";
 import { authMiddleware, type AuthEnv } from "../middleware/auth";
 import {
   jsonValidator,
@@ -61,7 +61,7 @@ app.get("/", queryValidator(assignmentQuerySchema), async (c) => {
         id: users.id,
         name: users.name,
         email: users.email,
-        avatarUrl: users.avatarUrl,
+        avatarUrl: users.image,
       },
       position: {
         id: teamPositions.id,

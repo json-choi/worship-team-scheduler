@@ -40,7 +40,7 @@ export default function HomeScreen() {
         }
       >
         <Text className="mb-1 text-2xl font-bold text-gray-900">
-          안녕하세요, {user?.user_metadata?.full_name ?? "멤버"}님
+          안녕하세요, {user?.name ?? "멤버"}님
         </Text>
         <Text className="mb-6 text-base text-gray-500">
           오늘도 함께 예배해요

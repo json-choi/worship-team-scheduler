@@ -31,12 +31,12 @@ export default function SettingsScreen() {
           <View className="flex-row items-center">
             <View className="h-14 w-14 items-center justify-center rounded-full bg-primary-100">
               <Text className="text-xl font-bold text-primary">
-                {user?.user_metadata?.full_name?.[0] ?? "?"}
+                {user?.name?.[0] ?? "?"}
               </Text>
             </View>
             <View className="ml-4 flex-1">
               <Text className="text-lg font-semibold text-gray-900">
-                {user?.user_metadata?.full_name ?? "이름 없음"}
+                {user?.name ?? "이름 없음"}
               </Text>
               <Text className="text-sm text-gray-500">{user?.email}</Text>
             </View>

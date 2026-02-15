@@ -1,47 +1,32 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
-import type { Session, User } from "@supabase/supabase-js";
-import { supabase } from "@/lib/supabase";
+import { createContext, useContext, type ReactNode } from "react";
+import { authClient } from "@/lib/auth";
 
 interface AuthContextType {
-  session: Session | null;
-  user: User | null;
+  user: {
+    id: string;
+    email: string;
+    name: string;
+    image?: string | null;
+  } | null;
   isLoggedIn: boolean;
   isLoading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType>({
-  session: null,
   user: null,
   isLoggedIn: false,
   isLoading: true,
 });
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [session, setSession] = useState<Session | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setIsLoading(false);
-    });
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
+  const { data: session, isPending } = authClient.useSession();
 
   return (
     <AuthContext.Provider
       value={{
-        session,
         user: session?.user ?? null,
-        isLoggedIn: !!session,
-        isLoading,
+        isLoggedIn: !!session?.user,
+        isLoading: isPending,
       }}
     >
       {children}

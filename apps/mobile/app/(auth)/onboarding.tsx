@@ -21,7 +21,7 @@ export default function OnboardingScreen() {
   const [step, setStep] = useState<Step>("profile");
   const [isLoading, setIsLoading] = useState(false);
 
-  const [name, setName] = useState(user?.user_metadata?.full_name ?? "");
+  const [name, setName] = useState(user?.name ?? "");
   const [phone, setPhone] = useState("");
 
   const [teamMode, setTeamMode] = useState<"join" | "create">("join");
@@ -38,7 +38,7 @@ export default function OnboardingScreen() {
     }
     setIsLoading(true);
     try {
-      await api("/auth/me", {
+      await api("/profile/me", {
         method: "PATCH",
         body: { name: name.trim(), phone: phone.trim() || undefined },
       });

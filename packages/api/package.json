@@ -9,11 +9,13 @@
     "lint": "tsc --noEmit"
   },
   "dependencies": {
+    "@better-auth/expo": "^1.4.18",
     "@hono/zod-validator": "^0.4.0",
-    "hono": "^4.7.0",
     "@wts/db": "workspace:*",
     "@wts/shared": "workspace:*",
+    "better-auth": "^1.4.18",
     "drizzle-orm": "^0.39.0",
+    "hono": "^4.7.0",
     "postgres": "^3.4.0",
     "zod": "^3.24.0"
   },

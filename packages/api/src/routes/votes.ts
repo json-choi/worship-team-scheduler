@@ -3,7 +3,7 @@ import { z } from "zod";
 import { eq, and } from "drizzle-orm";
 import { scheduleVotes, schedules, teamMembers, users } from "@wts/db";
 import { castVoteSchema, updateVoteSchema, voteQuerySchema } from "@wts/shared";
-import { getDb } from "../lib/supabase";
+import { getDb } from "../lib/db";
 import { authMiddleware, type AuthEnv } from "../middleware/auth";
 import {
   jsonValidator,
@@ -26,7 +26,7 @@ app.get("/", queryValidator(voteQuerySchema), async (c) => {
         id: users.id,
         name: users.name,
         email: users.email,
-        avatarUrl: users.avatarUrl,
+        avatarUrl: users.image,
       },
     })
     .from(scheduleVotes)

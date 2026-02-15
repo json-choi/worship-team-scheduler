@@ -7,7 +7,7 @@ import {
   updatePositionSchema,
   reorderPositionsSchema,
 } from "@wts/shared";
-import { getDb } from "../lib/supabase";
+import { getDb } from "../lib/db";
 import { type AuthEnv } from "../middleware/auth";
 import { authMiddleware } from "../middleware/auth";
 import { jsonValidator, paramValidator } from "../middleware/validate";

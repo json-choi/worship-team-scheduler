@@ -3,7 +3,7 @@ import { z } from "zod";
 import { eq, and } from "drizzle-orm";
 import { teamMembers, users } from "@wts/db";
 import { updateMemberSchema, approveMemberSchema } from "@wts/shared";
-import { getDb } from "../lib/supabase";
+import { getDb } from "../lib/db";
 import { authMiddleware, type AuthEnv } from "../middleware/auth";
 import { jsonValidator, paramValidator } from "../middleware/validate";
 
@@ -25,7 +25,7 @@ app.get("/team/:teamId", paramValidator(teamIdSchema), async (c) => {
         email: users.email,
         name: users.name,
         phone: users.phone,
-        avatarUrl: users.avatarUrl,
+        avatarUrl: users.image,
       },
     })
     .from(teamMembers)
@@ -46,7 +46,7 @@ app.get("/team/:teamId/pending", paramValidator(teamIdSchema), async (c) => {
         id: users.id,
         email: users.email,
         name: users.name,
-        avatarUrl: users.avatarUrl,
+        avatarUrl: users.image,
       },
     })
     .from(teamMembers)
