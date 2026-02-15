@@ -24,13 +24,13 @@ export default function LoginScreen() {
       <View className="flex-1 items-center justify-center px-8">
         <View className="mb-12 items-center">
           <View className="mb-4 h-20 w-20 items-center justify-center rounded-2xl bg-primary">
-            <Text className="text-3xl font-bold text-white">W</Text>
+            <Text className="text-3xl font-bold text-white">M</Text>
           </View>
           <Text className="text-2xl font-bold text-gray-900">
-            Worship Team Scheduler
+            Ministry Scheduler
           </Text>
           <Text className="mt-2 text-center text-base text-gray-500">
-            팀원들과 함께 예배 일정을 관리하세요
+            교회 사역팀 일정을 함께 관리하세요
           </Text>
         </View>
 

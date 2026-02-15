@@ -2,7 +2,7 @@ import { ExpoConfig, ConfigContext } from "expo/config";
 
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
-  name: "Worship Team Scheduler",
+  name: "Ministry Scheduler",
   slug: "worship-team-scheduler",
   version: "1.0.0",
   orientation: "portrait",

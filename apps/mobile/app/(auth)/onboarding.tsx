@@ -246,7 +246,7 @@ export default function OnboardingScreen() {
                   className="mb-6 rounded-lg border border-gray-200 px-4 py-3 text-base text-gray-900"
                   value={teamName}
                   onChangeText={setTeamName}
-                  placeholder="예: 소망교회 찬양팀"
+                  placeholder="예: 소망교회 찬양팀, 주일학교 등"
                   maxLength={50}
                 />
                 <Pressable
